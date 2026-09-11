@@ -1,0 +1,12 @@
+# Root temporary executables and objects
+/run
+/run.exe
+*.out
+*.o
+*.obj
+
+# Ignore executables files
+bin/
+
+# Demo Media Guidelines
+gifs/
