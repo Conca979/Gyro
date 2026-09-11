@@ -27,8 +27,6 @@ Multi-cube projection with independent spatial offsets and depth sorting.
 
 ![3D Cube Demo](gifs/cube_demo.gif)
 
-> *(To add or update recordings, place your `.gif` files in the `gifs/` directory with the names `dna_demo.gif`, `donut_demo.gif` and `cube_demo.gif`)*
-
 ---
 
 ## Features
