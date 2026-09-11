@@ -3,7 +3,44 @@
 #include <string.h>
 #include <unistd.h>
 
-float A, B, C;
+#ifdef _WIN32
+#include <conio.h>
+#else
+#include <termios.h>
+#include <fcntl.h>
+int _kbhit(void) {
+  struct termios oldt, newt;
+  int ch;
+  int oldf;
+  tcgetattr(STDIN_FILENO, &oldt);
+  newt = oldt;
+  newt.c_lflag &= ~(ICANON | ECHO);
+  tcsetattr(STDIN_FILENO, TCSANOW, &newt);
+  oldf = fcntl(STDIN_FILENO, F_GETFL, 0);
+  fcntl(STDIN_FILENO, F_SETFL, oldf | O_NONBLOCK);
+  ch = getchar();
+  tcsetattr(STDIN_FILENO, TCSANOW, &oldt);
+  fcntl(STDIN_FILENO, F_SETFL, oldf);
+  if(ch != EOF) {
+    ungetc(ch, stdin);
+    return 1;
+  }
+  return 0;
+}
+int _getch(void) {
+  struct termios oldt, newt;
+  int ch;
+  tcgetattr(STDIN_FILENO, &oldt);
+  newt = oldt;
+  newt.c_lflag &= ~(ICANON | ECHO);
+  tcsetattr(STDIN_FILENO, TCSANOW, &newt);
+  ch = getchar();
+  tcsetattr(STDIN_FILENO, TCSANOW, &oldt);
+  return ch;
+}
+#endif
+
+float A = 0, B = 0, C = 0;
 
 float cubeWidth = 20;
 int width = 160, height = 44;
@@ -48,6 +85,8 @@ void calculateForSurface(float cubeX, float cubeY, float cubeZ, int ch) {
   y = calculateY(cubeX, cubeY, cubeZ);
   z = calculateZ(cubeX, cubeY, cubeZ) + distanceFromCam;
 
+  if (z <= 0.1f) return;
+
   ooz = 1 / z;
 
   xp = (int)(width / 2 + horizontalOffset + K1 * ooz * x * 2);
@@ -63,8 +102,29 @@ void calculateForSurface(float cubeX, float cubeY, float cubeZ, int ch) {
 }
 
 int main() {
+  int paused = 0;
   printf("\x1b[2J");
   while (1) {
+    if (_kbhit()) {
+      char key = _getch();
+      if (key == 27) break; // Esc
+      if (key == 'w' || key == 'W') A -= 0.1f;
+      if (key == 's' || key == 'S') A += 0.1f;
+      if (key == 'a' || key == 'A') B -= 0.1f;
+      if (key == 'd' || key == 'D') B += 0.1f;
+      if (key == 'q' || key == 'Q') C -= 0.1f;
+      if (key == 'e' || key == 'E') C += 0.1f;
+      if (key == '=' || key == '+') distanceFromCam -= 5;
+      if (key == '-' || key == '_') distanceFromCam += 5;
+      if (key == ' ') paused = !paused;
+    }
+
+    if (!paused) {
+      A += 0.05;
+      B += 0.05;
+      C += 0.01;
+    }
+
     memset(buffer, backgroundASCIICode, width * height);
     memset(zBuffer, 0, width * height * 4);
     
@@ -114,11 +174,9 @@ int main() {
     for (int k = 0; k < width * height; k++) {
       putchar(k % width ? buffer[k] : 10);
     }
-
-    A += 0.05;
-    B += 0.05;
-    C += 0.01;
     
+    printf("\n  [W/S] Pitch   [A/D] Yaw   [Q/E] Roll   [+/-] Zoom   [Space] Pause   [Esc] Quit\n");
+
     usleep(8000 * 2);
   }
   
