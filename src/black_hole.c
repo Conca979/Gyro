@@ -406,15 +406,7 @@ int main() {
     printf("\x1b[H");
     fwrite(renderBuffer, 1, total_bytes, stdout);
     
-    static int first_frame = 1;
-    if (first_frame) {
-      FILE *f = fopen("frame.txt", "wb");
-      if (f) {
-        fwrite(renderBuffer, 1, total_bytes, f);
-        fclose(f);
-      }
-      first_frame = 0;
-    }
+
     
     t += 0.05f;
 #ifdef _WIN32
