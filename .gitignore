@@ -10,3 +10,10 @@ bin/
 
 # Demo Media Guidelines
 gifs/
+
+# Agents
+AGENTS.md
+
+# Local IDE and Notes
+.vscode/
+Further_optimization.txt

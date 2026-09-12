@@ -6,7 +6,7 @@ This document outlines planned 3D objects, physics expansions, and interactive s
 
 ## 🌌 Category 1: New 3D Objects & Mathematical Worlds
 
-- [x] **Solar System & Planetary Orbits (`src/spining_solar.c`)**
+- [x] **Solar System & Planetary Orbits (`src/solar_spinning.c`)**
   - **Description**: Real-time simulation of our solar system with a central illuminated Sun, orbiting planets, and moons.
   - **Mathematics**:
     - Circular & Keplerian elliptical orbital paths: `x(t) = a * cos(ω * t)`, `z(t) = b * sin(ω * t)`.
@@ -61,7 +61,7 @@ This document outlines planned 3D objects, physics expansions, and interactive s
 
 ---
 
-## 🤖 Category 2: Moving Body & World Physics Upgrades (`src/moving_body.c`)
+## 🤖 Category 2: Moving Body & World Physics Upgrades (`src/body_moving.c`)
 
 - [ ] **Jumping & Gravity Mechanics**
   - **Mechanics**:

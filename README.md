@@ -8,35 +8,35 @@ Real-time 3D geometric visualization and ASCII rendering in pure C.
 
 ## 🎬 Demos
 
-### ☀️ Solar System & Planetary Orbits (`src/spining_solar.c`)
+### ☀️ Solar System & Planetary Orbits (`src/solar_spinning.c`)
 Real-time celestial simulation with a glowing Sun, orbiting planets (Earth, Mars, Jupiter, Saturn with 3D tilted rings, and Moon), dynamic radial point-lighting (day/night shading), and planet camera targeting.
 
 ![Solar System Demo](gifs/solar_demo.gif)
 
 ---
 
-### 🤖 3D Moving Body & Third-Person Camera (`src/moving_body.c`)
+### 🤖 3D Moving Body & Third-Person Camera (`src/body_moving.c`)
 Hierarchically animated robot with smooth walking limb motions, a spatial reference floor grid, full third-person camera orbiting, and WASD movement navigation.
 
 ![Moving Body Demo](gifs/body_demo.gif)
 
 ---
 
-### 🧬 DNA Double Helix (Interactive) (`src/spining_dna.c`)
+### 🧬 DNA Double Helix (Interactive) (`src/dna_spinning.c`)
 Parametric double helix visualization with real-time interactive camera controls and base-pair rungs.
 
 ![DNA Double Helix Demo](gifs/dna_demo.gif)
 
 ---
 
-### 🍩 3D Illuminated Donut (`src/spining_donus.c`)
+### 🍩 3D Illuminated Donut (`src/donut_spinning.c`)
 Real-time surface normal illumination with 12-level ASCII shading.
 
 ![3D Donut Demo](gifs/donut_demo.gif)
 
 ---
 
-### 🧊 Triple Rotating Cubes (`src/spining_cube.c`)
+### 🧊 Triple Rotating Cubes (`src/cube_spinning.c`)
 Multi-cube projection with independent spatial offsets, depth sorting, and real-time 3D rotation controls.
 
 ![3D Cube Demo](gifs/cube_demo.gif)
@@ -45,11 +45,11 @@ Multi-cube projection with independent spatial offsets, depth sorting, and real-
 
 ## Features
 
-- **Solar System & Planetary Orbits** (`src/spining_solar.c`): Multi-body celestial system with central radial point lighting (day/night hemisphere shading), hierarchical moon orbits, Saturn's ring disc, time speed scaling, and planet camera focus switching.
-- **3D Moving Body & Camera** (`src/moving_body.c`): A hierarchically animated robot with smooth limb walking animations, set in a true 3D space with a third-person camera. Control movement with `WASD` and orbit the camera with `IJKL`.
-- **DNA Double Helix** (`src/spining_dna.c`): Parametric double helix visualization with real-time interactive camera controls.
-- **3D Torus (Donut)** (`src/spining_donus.c`): Real-time surface normal lighting mapped to an ASCII luminance ramp (`.,-~:;=!*#$@`).
-- **Triple Rotating Cubes** (`src/spining_cube.c`): Three simultaneous cubes of varying sizes with independent spatial offsets.
+- **Solar System & Planetary Orbits** (`src/solar_spinning.c`): Multi-body celestial system with central radial point lighting (day/night hemisphere shading), hierarchical moon orbits, Saturn's ring disc, time speed scaling, and planet camera focus switching.
+- **3D Moving Body & Camera** (`src/body_moving.c`): A hierarchically animated robot with smooth limb walking animations, set in a true 3D space with a third-person camera. Control movement with `WASD` and orbit the camera with `IJKL`.
+- **DNA Double Helix** (`src/dna_spinning.c`): Parametric double helix visualization with real-time interactive camera controls.
+- **3D Torus (Donut)** (`src/donut_spinning.c`): Real-time surface normal lighting mapped to an ASCII luminance ramp (`.,-~:;=!*#$@`).
+- **Triple Rotating Cubes** (`src/cube_spinning.c`): Three simultaneous cubes of varying sizes with independent spatial offsets.
 - **Depth Buffering**: Custom z-buffer to prevent surface overlap and clipping artifacts.
 - **Pure C**: Zero external graphic libraries or dependencies, relying only on standard C runtime (`math.h`, `stdio.h`, `string.h`, `unistd.h`).
 
@@ -59,21 +59,50 @@ Multi-cube projection with independent spatial offsets, depth sorting, and real-
 
 ### Prerequisites
 
-A C compiler such as `gcc` or `clang` (e.g. MinGW / MSYS2 on Windows, or standard GCC on Linux / macOS).
+A C compiler such as `gcc` or `clang` (e.g. MinGW / MSYS2 on Windows, or standard GCC on Linux / macOS), and `make`.
+
+### Build with Make (Recommended)
+
+Build all demos into the `bin/` directory at once:
+
+```bash
+make
+```
+
+Or build an individual demo:
+
+```bash
+make solar_spinning
+make body_moving
+make dna_spinning
+make cube_spinning
+make donut_spinning
+```
+
+Clean all compiled executables:
+
+```bash
+make clean
+```
+
+All compiled binaries are placed in `bin/` with identical base names (`bin/<name>.exe` on Windows, `bin/<name>` on Linux/macOS).
 
 ---
 
 ### 1. ☀️ Solar System & Planetary Orbits
 
 ```bash
-# Compile
-gcc src/spining_solar.c -o run -lm
+# Build
+make solar_spinning
+
+# Or compile manually with gcc:
+# gcc src/solar_spinning.c -o bin/solar_spinning -lm
 
 # Run (Windows)
-.\run.exe
+.\bin\solar_spinning.exe
 
 # Run (Linux / macOS)
-./run
+./bin/solar_spinning
 ```
 
 **Interactive Controls:**
@@ -91,14 +120,17 @@ gcc src/spining_solar.c -o run -lm
 ### 2. 🤖 3D Moving Body & Camera
 
 ```bash
-# Compile
-gcc src/moving_body.c -o run -lm
+# Build
+make body_moving
+
+# Or compile manually with gcc:
+# gcc src/body_moving.c -o bin/body_moving -lm
 
 # Run (Windows)
-.\run.exe
+.\bin\body_moving.exe
 
 # Run (Linux / macOS)
-./run
+./bin/body_moving
 ```
 
 **Interactive Controls:**
@@ -114,14 +146,17 @@ gcc src/moving_body.c -o run -lm
 ### 3. 🧬 DNA Double Helix (Interactive)
 
 ```bash
-# Compile
-gcc src/spining_dna.c -o run -lm
+# Build
+make dna_spinning
+
+# Or compile manually with gcc:
+# gcc src/dna_spinning.c -o bin/dna_spinning -lm
 
 # Run (Windows)
-.\run.exe
+.\bin\dna_spinning.exe
 
 # Run (Linux / macOS)
-./run
+./bin/dna_spinning
 ```
 
 **Interactive Controls:**
@@ -139,14 +174,17 @@ gcc src/spining_dna.c -o run -lm
 ### 4. 🧊 Triple Rotating Cubes
 
 ```bash
-# Compile
-gcc src/spining_cube.c -o run -lm
+# Build
+make cube_spinning
+
+# Or compile manually with gcc:
+# gcc src/cube_spinning.c -o bin/cube_spinning -lm
 
 # Run (Windows)
-.\run.exe
+.\bin\cube_spinning.exe
 
 # Run (Linux / macOS)
-./run
+./bin/cube_spinning
 ```
 
 **Interactive Controls:**
@@ -164,14 +202,17 @@ gcc src/spining_cube.c -o run -lm
 ### 5. 🍩 3D Illuminated Donut
 
 ```bash
-# Compile
-gcc src/spining_donus.c -o run -lm
+# Build
+make donut_spinning
+
+# Or compile manually with gcc:
+# gcc src/donut_spinning.c -o bin/donut_spinning -lm
 
 # Run (Windows)
-.\run.exe
+.\bin\donut_spinning.exe
 
 # Run (Linux / macOS)
-./run
+./bin/donut_spinning
 ```
 
 *Continuous autonomous dual-axis rotation with dynamic 12-level surface normal luminance calculation.*
@@ -186,13 +227,13 @@ gcc src/spining_donus.c -o run -lm
 
 See [FUTURE_TASKS.md](FUTURE_TASKS.md) for detailed mathematical specifications, controls, and planned simulations.
 
-- [x] 3D Animated Hierarchical Body (`src/moving_body.c`)
-- [x] DNA Double Helix visualization (`src/spining_dna.c`)
+- [x] 3D Animated Hierarchical Body (`src/body_moving.c`)
+- [x] DNA Double Helix visualization (`src/dna_spinning.c`)
 - [x] Interactive rotation and camera controls (`WASD` / `IJKL` / zoom)
-- [x] Solar System & Planetary Orbits (`src/spining_solar.c`)
+- [x] Solar System & Planetary Orbits (`src/solar_spinning.c`)
 - [ ] Procedural 3D Terrain Flight Simulator (`src/fly_terrain.c`)
 - [ ] Black Hole & Gravitational Lensing (`src/black_hole.c`)
 - [ ] Interactive 3D Rubik's Cube (`src/rubiks_cube.c`)
 - [ ] 3D Wave Tank & Ripple Surface (`src/wave_surface.c`)
-- [ ] Jumping & Gravity mechanics in `src/moving_body.c`
+- [ ] Jumping & Gravity mechanics in `src/body_moving.c`
 - [ ] ANSI TrueColor (24-bit RGB) shading support
