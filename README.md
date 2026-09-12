@@ -48,6 +48,11 @@ Fully functional 3×3×3 Rubik's cube rendered with solid colored faces using 2D
 
 ---
 
+### 🕳️ Schwarzschild Black Hole (`src/black_hole.c`)
+Relativistic raymarching engine simulating a black hole and accretion disk using 4th-order Runge-Kutta integration, gravitational lensing, and TrueColor Doppler beaming.
+
+---
+
 ## Features
 
 - **Solar System & Planetary Orbits** (`src/solar_spinning.c`): Multi-body celestial system with central radial point lighting (day/night hemisphere shading), hierarchical moon orbits, Saturn's ring disc, time speed scaling, and planet camera focus switching.
@@ -56,6 +61,7 @@ Fully functional 3×3×3 Rubik's cube rendered with solid colored faces using 2D
 - **3D Torus (Donut)** (`src/donut_spinning.c`): Real-time surface normal lighting mapped to an ASCII luminance ramp (`.,-~:;=!*#$@`).
 - **Triple Rotating Cubes** (`src/cube_spinning.c`): Three simultaneous cubes of varying sizes with independent spatial offsets.
 - **Interactive 3D Rubik's Cube** (`src/rubiks_cube.c`): Fully functional puzzle rendered using true 2D scanline rasterization with ANSI colors and interactive animations.
+- **Schwarzschild Black Hole** (`src/black_hole.c`): Real-time volumetric raymarching using OpenMP, rendering curved spacetime, gravitational lensing, and relativistic Doppler beaming with TrueColor ANSI escape sequences.
 - **Depth Buffering**: Custom z-buffer to prevent surface overlap and clipping artifacts.
 - **Pure C**: Zero external graphic libraries or dependencies, relying only on standard C runtime (`math.h`, `stdio.h`, `string.h`, `unistd.h`).
 
@@ -84,6 +90,7 @@ make dna_spinning
 make cube_spinning
 make donut_spinning
 make rubiks_cube
+make black_hole
 ```
 
 Clean all compiled executables:
@@ -233,7 +240,33 @@ make rubiks_cube
 
 ---
 
-### 6. 🍩 3D Illuminated Donut
+### 6. 🕳️ Schwarzschild Black Hole & Gravitational Lensing
+
+```bash
+# Build (Requires OpenMP support in GCC)
+make black_hole
+
+# Or compile manually with gcc:
+# gcc -O3 -fopenmp -Wall src/black_hole.c -o bin/black_hole -lm
+
+# Run (Windows)
+.\bin\black_hole.exe
+
+# Run (Linux / macOS)
+./bin/black_hole
+```
+
+**Interactive Controls:**
+| Key | Action |
+| :--- | :--- |
+| `W` / `S` | Pitch camera down / up |
+| `A` / `D` | Orbit camera left / right |
+| `+` / `-` | Zoom in / out |
+| `Esc` | Exit |
+
+---
+
+### 7. 🍩 3D Illuminated Donut
 
 ```bash
 # Build
@@ -266,7 +299,7 @@ See [FUTURE_TASKS.md](FUTURE_TASKS.md) for detailed mathematical specifications,
 - [x] Interactive rotation and camera controls (`WASD` / `IJKL` / zoom)
 - [x] Solar System & Planetary Orbits (`src/solar_spinning.c`)
 - [ ] Procedural 3D Terrain Flight Simulator (`src/fly_terrain.c`)
-- [ ] Black Hole & Gravitational Lensing (`src/black_hole.c`)
+- [x] Black Hole & Gravitational Lensing (`src/black_hole.c`)
 - [x] Interactive 3D Rubik's Cube (`src/rubiks_cube.c`)
 - [ ] 3D Wave Tank & Ripple Surface (`src/wave_surface.c`)
 - [ ] Jumping & Gravity mechanics in `src/body_moving.c`

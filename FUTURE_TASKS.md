@@ -29,7 +29,7 @@ This document outlines planned 3D objects, physics expansions, and interactive s
     - `Q` / `E` for yaw (rudder turn).
     - `+` / `-` to adjust flight velocity.
 
-- [ ] **Black Hole & Gravitational Lensing (`src/black_hole.c`)**
+- [x] **Black Hole & Gravitational Lensing (`src/black_hole.c`)**
   - **Description**: An ASCII visualization of a Schwarzschild black hole with an accretion disk and gravitational light deflection.
   - **Mathematics**:
     - Curved light ray paths bent around the event horizon: light deflection angle `α ≈ 4 * G * M / (c^2 * b)`.

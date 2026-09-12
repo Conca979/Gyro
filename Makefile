@@ -1,6 +1,6 @@
 CC ?= gcc
-CFLAGS ?= -O3 -Wall
-LDFLAGS ?= -lm
+CFLAGS ?= -O3 -Wall -fopenmp
+LDFLAGS ?= -lm -fopenmp
 
 SRC_DIR = src
 BIN_DIR = bin
