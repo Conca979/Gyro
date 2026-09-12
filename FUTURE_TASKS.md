@@ -39,7 +39,7 @@ This document outlines planned 3D objects, physics expansions, and interactive s
     - Camera orbit around the singularity (`I` / `J` / `K` / `L`).
     - Spin rate adjustments and zoom controls.
 
-- [ ] **Interactive 3D Rubik's Cube (`src/rubiks_cube.c`)**
+- [x] **Interactive 3D Rubik's Cube (`src/rubiks_cube.c`)**
   - **Description**: Fully functional 3×3×3 Rubik's cube rendered with 27 sub-cubes.
   - **Mathematics**:
     - Dynamic hierarchical transformations: rotating a slice involves transforming 9 sub-cubes by 90° about a chosen principal axis (X, Y, or Z).

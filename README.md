@@ -43,6 +43,11 @@ Multi-cube projection with independent spatial offsets, depth sorting, and real-
 
 ---
 
+### 🎲 Interactive 3D Rubik's Cube (`src/rubiks_cube.c`)
+Fully functional 3×3×3 Rubik's cube rendered with solid colored faces using 2D scanline rasterization. Playable with standard notation inputs and features a live minimap HUD.
+
+---
+
 ## Features
 
 - **Solar System & Planetary Orbits** (`src/solar_spinning.c`): Multi-body celestial system with central radial point lighting (day/night hemisphere shading), hierarchical moon orbits, Saturn's ring disc, time speed scaling, and planet camera focus switching.
@@ -50,6 +55,7 @@ Multi-cube projection with independent spatial offsets, depth sorting, and real-
 - **DNA Double Helix** (`src/dna_spinning.c`): Parametric double helix visualization with real-time interactive camera controls.
 - **3D Torus (Donut)** (`src/donut_spinning.c`): Real-time surface normal lighting mapped to an ASCII luminance ramp (`.,-~:;=!*#$@`).
 - **Triple Rotating Cubes** (`src/cube_spinning.c`): Three simultaneous cubes of varying sizes with independent spatial offsets.
+- **Interactive 3D Rubik's Cube** (`src/rubiks_cube.c`): Fully functional puzzle rendered using true 2D scanline rasterization with ANSI colors and interactive animations.
 - **Depth Buffering**: Custom z-buffer to prevent surface overlap and clipping artifacts.
 - **Pure C**: Zero external graphic libraries or dependencies, relying only on standard C runtime (`math.h`, `stdio.h`, `string.h`, `unistd.h`).
 
@@ -77,6 +83,7 @@ make body_moving
 make dna_spinning
 make cube_spinning
 make donut_spinning
+make rubiks_cube
 ```
 
 Clean all compiled executables:
@@ -199,7 +206,34 @@ make cube_spinning
 
 ---
 
-### 5. 🍩 3D Illuminated Donut
+### 5. 🎲 Interactive 3D Rubik's Cube
+
+```bash
+# Build
+make rubiks_cube
+
+# Or compile manually with gcc:
+# gcc src/rubiks_cube.c -o bin/rubiks_cube -lm
+
+# Run (Windows)
+.\bin\rubiks_cube.exe
+
+# Run (Linux / macOS)
+./bin/rubiks_cube
+```
+
+**Interactive Controls:**
+| Key | Action |
+| :--- | :--- |
+| `u/d/l/r/f/b` | Standard Singmaster clockwise slice rotation |
+| `U/D/L/R/F/B` (Shift) | Standard Singmaster counter-clockwise slice rotation |
+| `Arrows` | Orbit Camera |
+| `Space` | Instant Scramble / Reset |
+| `Esc` | Exit |
+
+---
+
+### 6. 🍩 3D Illuminated Donut
 
 ```bash
 # Build
@@ -233,7 +267,7 @@ See [FUTURE_TASKS.md](FUTURE_TASKS.md) for detailed mathematical specifications,
 - [x] Solar System & Planetary Orbits (`src/solar_spinning.c`)
 - [ ] Procedural 3D Terrain Flight Simulator (`src/fly_terrain.c`)
 - [ ] Black Hole & Gravitational Lensing (`src/black_hole.c`)
-- [ ] Interactive 3D Rubik's Cube (`src/rubiks_cube.c`)
+- [x] Interactive 3D Rubik's Cube (`src/rubiks_cube.c`)
 - [ ] 3D Wave Tank & Ripple Surface (`src/wave_surface.c`)
 - [ ] Jumping & Gravity mechanics in `src/body_moving.c`
 - [ ] ANSI TrueColor (24-bit RGB) shading support
