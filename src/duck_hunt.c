@@ -75,7 +75,7 @@ int get_font_bits(char c) {
   }
 }
 
-void draw_scaled_text(char** buffer, int start_x, int start_y, const char* text, int scale, int max_w, int max_h) {
+void draw_scaled_text(char** buffer, int** color_buffer, int start_x, int start_y, const char* text, int scale, int max_w, int max_h, int color) {
   int cur_x = start_x;
   for (int i = 0; text[i] != '\0'; i++) {
     int bits = get_font_bits(text[i]);
@@ -89,6 +89,7 @@ void draw_scaled_text(char** buffer, int start_x, int start_y, const char* text,
               int px = cur_x + (x * scale) + sx;
               if (py >= 0 && py < max_h && px >= 0 && px < max_w) {
                 buffer[py][px] = '#'; 
+                if (color_buffer) color_buffer[py][px] = color;
               }
             }
           }
@@ -197,9 +198,10 @@ typedef struct {
 Entity3D entities[10];
 int num_entities = 5;
 
-float map_scene(vec3 p) {
+float map_scene(vec3 p, int* out_color) {
   // Infinite Ground Plane
   float min_d = p.y + 2.0f;
+  if (out_color) *out_color = 32; // Green
   
   // Infinite Forest (Domain Repetition)
   vec3 q = p;
@@ -213,7 +215,10 @@ float map_scene(vec3 p) {
   
   float tree = smin(trunk, leaves, 0.5f);
   
-  if (tree < min_d) min_d = tree;
+  if (tree < min_d) {
+    min_d = tree;
+    if (out_color) *out_color = 33; // Yellow/Brown
+  }
   
   for (int i = 0; i < num_entities; i++) {
     if (entities[i].is_alive || entities[i].is_falling) {
@@ -223,13 +228,25 @@ float map_scene(vec3 p) {
       float bound_dist = length(lp) - 2.5f; 
       
       if (bound_dist > 0.5f) {
-        if (bound_dist < min_d) min_d = bound_dist;
+        if (bound_dist < min_d) {
+          min_d = bound_dist;
+          if (out_color) *out_color = 0; // Empty/bound
+        }
       } else {
         lp = rotate_y(lp, entities[i].yaw);
         if (entities[i].is_falling) lp = rotate_z(lp, 1.57f);
         
         float d = map_entity(scale(lp, 2.0f), entities[i].type, sinf(time_sec * 15.0f) * 0.8f) * 0.5f;
-        if (d < min_d) min_d = d;
+        if (d < min_d) {
+          min_d = d;
+          if (out_color) {
+            if (entities[i].type == TYPE_DUCK) *out_color = 93;
+            else if (entities[i].type == TYPE_PIG) *out_color = 95;
+            else if (entities[i].type == TYPE_DEER) *out_color = 33;
+            else if (entities[i].type == TYPE_BIRD) *out_color = 96;
+            else if (entities[i].type == TYPE_PLANE) *out_color = 97;
+          }
+        }
       }
     }
   }
@@ -240,7 +257,7 @@ float ray_march(vec3 ro, vec3 rd, float max_dist) {
   float dO = 0;
   for (int i = 0; i < MAX_STEPS; i++) {
     vec3 p = add(ro, scale(rd, dO));
-    float dS = map_scene(p);
+    float dS = map_scene(p, NULL);
     dO += dS;
     if (dO > max_dist || dS < SURF_DIST) break;
   }
@@ -248,11 +265,11 @@ float ray_march(vec3 ro, vec3 rd, float max_dist) {
 }
 
 vec3 calc_normal(vec3 p) {
-  float d = map_scene(p);
+  float d = map_scene(p, NULL);
   vec3 n = {
-    d - map_scene((vec3){p.x - 0.01f, p.y, p.z}),
-    d - map_scene((vec3){p.x, p.y - 0.01f, p.z}),
-    d - map_scene((vec3){p.x, p.y, p.z - 0.01f})
+    d - map_scene((vec3){p.x - 0.01f, p.y, p.z}, NULL),
+    d - map_scene((vec3){p.x, p.y - 0.01f, p.z}, NULL),
+    d - map_scene((vec3){p.x, p.y, p.z - 0.01f}, NULL)
   };
   return normalize(n);
 }
@@ -335,6 +352,7 @@ int main(int argc, char *argv[]) {
   
   char* renderBuffer = NULL;
   char** rowBuffers = NULL;
+  int** colorBuffers = NULL;
   float* z_buffer = NULL;
   int last_w = 0, last_h = 0;
   
@@ -346,14 +364,22 @@ int main(int argc, char *argv[]) {
     get_terminal_size(&w, &h);
     
     if (w != last_w || h != last_h) {
-      renderBuffer = realloc(renderBuffer, h * (w + 2) + 2048); 
+      renderBuffer = realloc(renderBuffer, h * (w + 2) * 20 + 2048); 
       z_buffer = realloc(z_buffer, w * sizeof(float));
       if (rowBuffers) {
-        for(int i=0; i<last_h; i++) free(rowBuffers[i]);
+        for(int i=0; i<last_h; i++) {
+          free(rowBuffers[i]);
+          free(colorBuffers[i]);
+        }
         free(rowBuffers);
+        free(colorBuffers);
       }
       rowBuffers = malloc(h * sizeof(char*));
-      for(int i=0; i<h; i++) rowBuffers[i] = malloc(w + 2);
+      colorBuffers = malloc(h * sizeof(int*));
+      for(int i=0; i<h; i++) {
+        rowBuffers[i] = malloc(w + 2);
+        colorBuffers[i] = malloc((w + 2) * sizeof(int));
+      }
       last_w = w; last_h = h;
     }
     
@@ -583,7 +609,7 @@ int main(int argc, char *argv[]) {
       int start_x = w/2 - go_width/2;
       int start_y = h/2 - (10 * scale);
       
-      draw_scaled_text(rowBuffers, start_x, start_y, "GAME OVER", scale, w, h);
+      draw_scaled_text(rowBuffers, colorBuffers, start_x, start_y, "GAME OVER", scale, w, h, 91); // Bright Red
       
       int sub_scale = scale / 2;
       if (sub_scale < 1) sub_scale = 1;
@@ -592,12 +618,12 @@ int main(int argc, char *argv[]) {
       snprintf(msg, sizeof(msg), "FINAL SCORE: %d", score);
       int msg_len = strlen(msg);
       int sub_width = msg_len * 4 * sub_scale;
-      draw_scaled_text(rowBuffers, w/2 - sub_width/2, start_y + (6 * scale) + (2 * sub_scale), msg, sub_scale, w, h);
+      draw_scaled_text(rowBuffers, colorBuffers, w/2 - sub_width/2, start_y + (6 * scale) + (2 * sub_scale), msg, sub_scale, w, h, 97); // White
       
       const char* rm = "PRESS SPACE TO PLAY AGAIN";
       int rm_len = strlen(rm);
       int rm_width = rm_len * 4 * sub_scale;
-      draw_scaled_text(rowBuffers, w/2 - rm_width/2, start_y + (6 * scale) + (9 * sub_scale), rm, sub_scale, w, h);
+      draw_scaled_text(rowBuffers, colorBuffers, w/2 - rm_width/2, start_y + (6 * scale) + (9 * sub_scale), rm, sub_scale, w, h, 97); // White
     } else {
       // --- 1. SDF Pass (Open World & Actors) ---
       vec3 light_dir = normalize((vec3){1.0f, 1.0f, -0.5f});
@@ -628,6 +654,11 @@ int main(int argc, char *argv[]) {
             if (d < MAX_DIST) {
               vec3 p = add(ro, scale(rd, d));
               vec3 n = calc_normal(p);
+              
+              int hit_color = 0;
+              map_scene(p, &hit_color);
+              colorBuffers[y][x] = hit_color;
+              
               float dif = fmaxf(dot(n, light_dir), 0.0f);
               float intensity = 0.2f + 0.8f * dif;
               if (p.y < -1.9f) {
@@ -638,22 +669,27 @@ int main(int argc, char *argv[]) {
               if (char_idx > 12) char_idx = 12;
               rowBuffers[y][x] = shading[char_idx];
             } else {
-              if (rd.y > 0.2f) rowBuffers[y][x] = ' ';
-              else if (rd.y > 0.05f) rowBuffers[y][x] = '.';
-              else rowBuffers[y][x] = '-';
+              colorBuffers[y][x] = 0;
+              if (rd.y > 0.2f) { rowBuffers[y][x] = ' '; colorBuffers[y][x] = 0; }
+              else if (rd.y > 0.05f) { rowBuffers[y][x] = '.'; colorBuffers[y][x] = 90; } // Dark Gray clouds
+              else { rowBuffers[y][x] = '-'; colorBuffers[y][x] = 90; }
             }
           } else if (x == game_w) {
             rowBuffers[y][x] = '|';
+            colorBuffers[y][x] = 97; // White border
           } else {
             rowBuffers[y][x] = ' ';
+            colorBuffers[y][x] = 0;
           }
         }
         rowBuffers[y][w] = '\n';
+        colorBuffers[y][w] = 0;
         rowBuffers[y][w+1] = '\0';
       }
       
       // Crosshair
       rowBuffers[h/2][game_w/2] = '+';
+      colorBuffers[h/2][game_w/2] = 91; // Red crosshair
       
       // FPS Viewmodel
       const char* gun_sprite[] = { "   .==.   ", "   ||||   ", "   ||||   ", "  /||||\\  ", " /||||||\\ ", "/_||||||_\\" };
@@ -665,7 +701,9 @@ int main(int argc, char *argv[]) {
       
       if (just_fired && ammo >= 0) {
         if (gun_y - 2 >= 0) {
-          rowBuffers[gun_y-2][game_w/2] = '*'; rowBuffers[gun_y-1][game_w/2-1] = '\\'; rowBuffers[gun_y-1][game_w/2+1] = '/';
+          rowBuffers[gun_y-2][game_w/2] = '*'; colorBuffers[gun_y-2][game_w/2] = 93;
+          rowBuffers[gun_y-1][game_w/2-1] = '\\'; colorBuffers[gun_y-1][game_w/2-1] = 93;
+          rowBuffers[gun_y-1][game_w/2+1] = '/'; colorBuffers[gun_y-1][game_w/2+1] = 93;
         }
       }
       for (int gy = 0; gy < gun_h; gy++) {
@@ -673,6 +711,7 @@ int main(int argc, char *argv[]) {
           int sy = gun_y + gy, sx = gun_x + gx;
           if (sy >= 0 && sy < h && sx >= 0 && sx < game_w && gun_sprite[gy][gx] != ' ') {
             rowBuffers[sy][sx] = gun_sprite[gy][gx];
+            colorBuffers[sy][sx] = 90; // Dark gray gun
           }
         }
       }
@@ -684,28 +723,28 @@ int main(int argc, char *argv[]) {
       int hud_x = game_w + 3;
       if (hud_x + 30 < w) {
         int sy = h * 0.05f;
-        draw_scaled_text(rowBuffers, hud_x, sy, "DUCK HUNT 3D", scale_factor, w, h);
+        draw_scaled_text(rowBuffers, colorBuffers, hud_x, sy, "DUCK HUNT 3D", scale_factor, w, h, 96); // Cyan
         
         sy += (5 * scale_factor) + (2 * scale_factor);
         char buf[64];
         snprintf(buf, sizeof(buf), "TIME: %02d", (int)game_timer);
-        draw_scaled_text(rowBuffers, hud_x, sy, buf, scale_factor, w, h);
+        draw_scaled_text(rowBuffers, colorBuffers, hud_x, sy, buf, scale_factor, w, h, 97); // White
         
         sy += (5 * scale_factor) + (2 * scale_factor);
         snprintf(buf, sizeof(buf), "SCORE: %06d", score);
-        draw_scaled_text(rowBuffers, hud_x, sy, buf, scale_factor, w, h);
+        draw_scaled_text(rowBuffers, colorBuffers, hud_x, sy, buf, scale_factor, w, h, 97);
         
         sy += (5 * scale_factor) + (2 * scale_factor);
         snprintf(buf, sizeof(buf), "HUNTED: %04d", kill_count);
-        draw_scaled_text(rowBuffers, hud_x, sy, buf, scale_factor, w, h);
+        draw_scaled_text(rowBuffers, colorBuffers, hud_x, sy, buf, scale_factor, w, h, 97);
         
         sy += (5 * scale_factor) + (2 * scale_factor);
         snprintf(buf, sizeof(buf), "AMMO: [%d/8]", ammo);
-        draw_scaled_text(rowBuffers, hud_x, sy, buf, scale_factor, w, h);
+        draw_scaled_text(rowBuffers, colorBuffers, hud_x, sy, buf, scale_factor, w, h, 97);
         
         if (reload_timer > 0.0f) {
           sy += (5 * scale_factor) + (2 * scale_factor);
-          draw_scaled_text(rowBuffers, hud_x, sy, "RELOADING", scale_factor, w, h);
+          draw_scaled_text(rowBuffers, colorBuffers, hud_x, sy, "RELOADING", scale_factor, w, h, 91); // Red
         }
         
         // Draw controls at the bottom using scaled block font
@@ -714,23 +753,23 @@ int main(int argc, char *argv[]) {
         sy += (10 * scale_factor); 
         
         if (sy + (5 * ctrl_scale) * 6 < h) { 
-          draw_scaled_text(rowBuffers, hud_x, sy, "--------------", ctrl_scale, w, h);
+          draw_scaled_text(rowBuffers, colorBuffers, hud_x, sy, "--------------", ctrl_scale, w, h, 90); // Dark gray
           sy += (5 * ctrl_scale) + (2 * ctrl_scale);
           
           if (!mouse_locked) {
-            draw_scaled_text(rowBuffers, hud_x, sy, "PAUSED", ctrl_scale, w, h);
+            draw_scaled_text(rowBuffers, colorBuffers, hud_x, sy, "PAUSED", ctrl_scale, w, h, 93); // Yellow
             sy += (5 * ctrl_scale) + (2 * ctrl_scale);
-            draw_scaled_text(rowBuffers, hud_x, sy, "PRESS ESC", ctrl_scale, w, h);
+            draw_scaled_text(rowBuffers, colorBuffers, hud_x, sy, "PRESS ESC", ctrl_scale, w, h, 93);
           } else {
-            draw_scaled_text(rowBuffers, hud_x, sy, "CONTROLS:", ctrl_scale, w, h);
+            draw_scaled_text(rowBuffers, colorBuffers, hud_x, sy, "CONTROLS:", ctrl_scale, w, h, 92); // Green
             sy += (5 * ctrl_scale) + (2 * ctrl_scale);
-            draw_scaled_text(rowBuffers, hud_x, sy, "WASD MOVE", ctrl_scale, w, h);
+            draw_scaled_text(rowBuffers, colorBuffers, hud_x, sy, "WASD MOVE", ctrl_scale, w, h, 97);
             sy += (5 * ctrl_scale) + (2 * ctrl_scale);
-            draw_scaled_text(rowBuffers, hud_x, sy, "LMB SHOOT", ctrl_scale, w, h);
+            draw_scaled_text(rowBuffers, colorBuffers, hud_x, sy, "LMB SHOOT", ctrl_scale, w, h, 97);
             sy += (5 * ctrl_scale) + (2 * ctrl_scale);
-            draw_scaled_text(rowBuffers, hud_x, sy, "E RELOAD", ctrl_scale, w, h);
+            draw_scaled_text(rowBuffers, colorBuffers, hud_x, sy, "E RELOAD", ctrl_scale, w, h, 97);
             sy += (5 * ctrl_scale) + (2 * ctrl_scale);
-            draw_scaled_text(rowBuffers, hud_x, sy, "ESC PAUSE", ctrl_scale, w, h);
+            draw_scaled_text(rowBuffers, colorBuffers, hud_x, sy, "ESC PAUSE", ctrl_scale, w, h, 97);
           }
         }
       }
@@ -741,10 +780,20 @@ int main(int argc, char *argv[]) {
     char* ptr = renderBuffer;
     ptr += sprintf(ptr, "\x1b[H");
     
+    int current_color = -1; 
     for (int y = 0; y < h; y++) {
-      memcpy(ptr, rowBuffers[y], w + 1);
-      ptr += w + 1;
+      for (int x = 0; x < w; x++) {
+        int color = colorBuffers[y][x];
+        if (color != current_color) {
+          current_color = color;
+          if (color == 0) ptr += sprintf(ptr, "\x1b[0m");
+          else ptr += sprintf(ptr, "\x1b[%dm", color);
+        }
+        *ptr++ = rowBuffers[y][x];
+      }
+      *ptr++ = '\n';
     }
+    ptr += sprintf(ptr, "\x1b[0m");
     fwrite(renderBuffer, 1, ptr - renderBuffer, stdout);
   }
 
