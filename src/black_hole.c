@@ -410,7 +410,7 @@ int main() {
     
     t += 0.05f;
 #ifdef _WIN32
-    Sleep(16.67); // Lock to ~60 FPS for stability under heavy raymarching load
+    Sleep(8); // Lock to ~60 FPS for stability under heavy raymarching load
 #else
     usleep(33000);
 #endif
