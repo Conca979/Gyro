@@ -73,6 +73,8 @@ Relativistic raymarching engine simulating a black hole and accretion disk using
 
 A C compiler such as `gcc` or `clang` (e.g. MinGW / MSYS2 on Windows, or standard GCC on Linux / macOS), and `make`.
 
+> 💡 **Environment Check:** Not sure if you have the required tools? Run `python doctor.py` to automatically diagnose your system and get installation instructions.
+
 ### Build with Make (Recommended)
 
 Build all demos into the `bin/` directory at once:

@@ -288,11 +288,7 @@ void get_terminal_size(int *width, int *height) {
 }
 
 int main(int argc, char *argv[]) {
-  FILE *log_fp = fopen("mouse_log.txt", "w");
-  if (log_fp) {
-    fprintf(log_fp, "Started Duck Hunt Mouse Log\n");
-    fflush(log_fp);
-  }
+
 
   srand((unsigned int)time(NULL));
   if (argc > 1 && (strcmp(argv[1], "--mode=B") == 0 || strcmp(argv[1], "--mode=b") == 0)) {
@@ -461,10 +457,7 @@ int main(int argc, char *argv[]) {
       
       SetCursorPos(center_x, center_y);
       
-      if (log_fp) {
-        fprintf(log_fp, "Mouse Delta: (%.3f, %.3f) | Cam: Yaw=%.3f Pitch=%.3f\n", dx, dy, cam_yaw, cam_pitch);
-        fflush(log_fp);
-      }
+
       
       // Shooting
       if (is_lbutton && !was_lbutton_down && ammo > 0 && reload_timer <= 0.0f && game_state == STATE_PLAYING) {
@@ -799,6 +792,6 @@ int main(int argc, char *argv[]) {
 
   printf("\x1b[?25h"); 
   ShowCursor(TRUE);
-  if (log_fp) fclose(log_fp);
+
   return 0;
 }
